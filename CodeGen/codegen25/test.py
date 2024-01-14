@@ -1,18 +1,34 @@
+import os
+import time
+import datetime
+
+import pandas as pd
+import seaborn as sns
+import numpy as np
+import random
+
+import matplotlib.pyplot as plt
+# %matplotlib inline
+
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from torch.utils.data import Dataset, DataLoader, random_split, RandomSampler, SequentialSampler
+torch.manual_seed(42)
+
+from transformers import GPT2LMHeadModel,  GPT2Tokenizer, GPT2Config, GPT2LMHeadModel
+from transformers import AdamW, get_linear_schedule_with_warmup, AutoTokenizer, AutoModelForCausalLM
+
+import nltk
+nltk.download('punkt')
+
 
 tokenizer = AutoTokenizer.from_pretrained("Salesforce/codegen25-7b-mono", trust_remote_code=True)
 model = AutoModelForCausalLM.from_pretrained("Salesforce/codegen25-7b-mono")
-inputs = tokenizer("# this function prints hello world", return_tensors="pt")
-sample = model.generate(**inputs, max_length=128)
-print(tokenizer.decode(sample[0]))
+# inputs = tokenizer("# this function prints hello world", return_tensors="pt")
+# sample = model.generate(**inputs, max_length=128)
+# print(tokenizer.decode(sample[0]))
 
 # mount my Google Drive directory and access the training data located there
-gdrive_dir = '/content/gdrive/'
-data_dir = os.path.join(gdrive_dir, 'My Drive', 'Colab Notebooks', 'nlp', 'text gen demos')
 filename = 'train-00000-of-00001-d9b93805488c263e.parquet'
-
-drive.mount(gdrive_dir, force_remount=True)
 
 # load into a data frame
 df = pd.read_parquet (filename)
@@ -45,7 +61,7 @@ len(doc_lengths[doc_lengths > 768])/len(doc_lengths)
 np.average(doc_lengths)
 
 # Load the GPT tokenizer.
-tokenizer = GPT2Tokenizer.from_pretrained('gpt2', bos_token='<|startoftext|>', eos_token='<|endoftext|>', pad_token='<|pad|>') #gpt2-medium
+# tokenizer = GPT2Tokenizer.from_pretrained('gpt2', bos_token='<|startoftext|>', eos_token='<|endoftext|>', pad_token='<|pad|>') #gpt2-medium
 
 print("The max model length is {} for this model, although the actual embedding size for GPT small is 768".format(tokenizer.model_max_length))
 print("The beginning of sequence token {} token has the id {}".format(tokenizer.convert_ids_to_tokens(tokenizer.bos_token_id), tokenizer.bos_token_id))
@@ -105,7 +121,7 @@ validation_dataloader = DataLoader(
 configuration = GPT2Config.from_pretrained('gpt2', output_hidden_states=False)
 
 # instantiate the model
-model = GPT2LMHeadModel.from_pretrained("gpt2", config=configuration)
+# model = GPT2LMHeadModel.from_pretrained("gpt2", config=configuration)
 
 # this step is necessary because I've added some tokens (bos_token, etc) to the embeddings
 # otherwise the tokenizer and model tensors won't match up
