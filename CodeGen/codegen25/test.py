@@ -28,10 +28,10 @@ model = AutoModelForCausalLM.from_pretrained("Salesforce/codegen25-7b-mono")
 # print(tokenizer.decode(sample[0]))
 
 # mount my Google Drive directory and access the training data located there
-filename = 'train-00000-of-00001-d9b93805488c263e.parquet'
+filename = 'codegen25/train-00000-of-00001-d9b93805488c263e.parquet'
 
 # load into a data frame
-df = pd.read_parquet (filename)
+df = pd.read_parquet(filename)
 print(df.head)
 
 print(df.columns)
