@@ -20,9 +20,10 @@ from transformers import AdamW, get_linear_schedule_with_warmup, AutoTokenizer, 
 import nltk
 nltk.download('punkt')
 
+print(torch.version.cuda)
 
-tokenizer = AutoTokenizer.from_pretrained("Salesforce/codegen25-7b-mono", trust_remote_code=True)
-model = AutoModelForCausalLM.from_pretrained("Salesforce/codegen25-7b-mono")
+tokenizer = AutoTokenizer.from_pretrained("Salesforce/codegen25-7b-multi", trust_remote_code=True)
+model = AutoModelForCausalLM.from_pretrained("Salesforce/codegen25-7b-multi")
 # inputs = tokenizer("# this function prints hello world", return_tensors="pt")
 # sample = model.generate(**inputs, max_length=128)
 # print(tokenizer.decode(sample[0]))
@@ -32,9 +33,9 @@ filename = 'codegen25/train-00000-of-00001-d9b93805488c263e.parquet'
 
 # load into a data frame
 df = pd.read_parquet(filename)
-print(df.head)
+# print(df.head)
 df.dropna(inplace=True) #remove NA values
-print(df.columns)
+# print(df.columns)
 
 print()
 
@@ -53,7 +54,7 @@ for bio in bios:
 
 doc_lengths = np.array(doc_lengths)
 
-sns.distplot(doc_lengths)
+sns.displot(doc_lengths)
 
 # the max token length
 len(doc_lengths[doc_lengths > 768])/len(doc_lengths)
@@ -62,15 +63,18 @@ np.average(doc_lengths)
 
 # Load the GPT tokenizer.
 # tokenizer = GPT2Tokenizer.from_pretrained('gpt2', bos_token='<|startoftext|>', eos_token='<|endoftext|>', pad_token='<|pad|>') #gpt2-medium
-print(dir(tokenizer))
-print("The max model length is {} for this model, although the actual embedding size for GPT small is 768".format(tokenizer.model_max_length))
-print("The beginning of sequence token {} token has the id {}".format(tokenizer._convert_id_to_token(tokenizer.bos_token_id), tokenizer.bos_token_id))
+# print(dir(tokenizer))
+# print(tokenizer.bos_token_id)
+
+# pad and eos tokens are none for codegen25-7b-mono see toeknizer_config.json
+print("The max model length is {} for this model".format(tokenizer.model_max_length))
+# print("The beginning of sequence token {} token has the id {}".format(tokenizer._convert_id_to_token(tokenizer.bos_token_id), tokenizer.bos_token_id))
 print("The end of sequence token {} has the id {}".format(tokenizer._convert_id_to_token(tokenizer.eos_token_id), tokenizer.eos_token_id))
-print("The padding token {} has the id {}".format(tokenizer._convert_id_to_token(tokenizer.pad_token_id), tokenizer.pad_token_id))
+# print("The padding token {} has the id {}".format(tokenizer._convert_id_to_token(tokenizer.pad_token_id), tokenizer.pad_token_id))
 
 batch_size = 2
 
-class GPT2Dataset(Dataset):
+class UCDataset(Dataset):
 
   def __init__(self, txt_list, tokenizer, gpt2_type="gpt2", max_length=768):
 
@@ -80,7 +84,7 @@ class GPT2Dataset(Dataset):
 
     for txt in txt_list:
 
-      encodings_dict = tokenizer('<|startoftext|>'+ txt + '<|endoftext|>', truncation=True, max_length=max_length, padding="max_length")
+      encodings_dict = tokenizer( txt + '<|endoftext|>', truncation=True, max_length=max_length)
 
       self.input_ids.append(torch.tensor(encodings_dict['input_ids']))
       self.attn_masks.append(torch.tensor(encodings_dict['attention_mask']))
@@ -91,7 +95,7 @@ class GPT2Dataset(Dataset):
   def __getitem__(self, idx):
     return self.input_ids[idx], self.attn_masks[idx]
   
-  dataset = GPT2Dataset(bios, tokenizer, max_length=768)
+dataset = UCDataset(bios, tokenizer, max_length=768)
 
 # Split into training and validation sets
 train_size = int(0.9 * len(dataset))
