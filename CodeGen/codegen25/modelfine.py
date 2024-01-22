@@ -33,7 +33,7 @@ filename = 'codegen25/train-00000-of-00001-d9b93805488c263e.parquet'
 # load into a data frame
 df = pd.read_parquet(filename)
 print(df.head)
-
+df.dropna(inplace=True) #remove NA values
 print(df.columns)
 
 print()
@@ -62,11 +62,11 @@ np.average(doc_lengths)
 
 # Load the GPT tokenizer.
 # tokenizer = GPT2Tokenizer.from_pretrained('gpt2', bos_token='<|startoftext|>', eos_token='<|endoftext|>', pad_token='<|pad|>') #gpt2-medium
-
-# print("The max model length is {} for this model, although the actual embedding size for GPT small is 768".format(tokenizer.model_max_length))
-# print("The beginning of sequence token {} token has the id {}".format(tokenizer.convert_ids_to_tokens(tokenizer.bos_token_id), tokenizer.bos_token_id))
-# print("The end of sequence token {} has the id {}".format(tokenizer.convert_ids_to_tokens(tokenizer.eos_token_id), tokenizer.eos_token_id))
-# print("The padding token {} has the id {}".format(tokenizer.convert_ids_to_tokens(tokenizer.pad_token_id), tokenizer.pad_token_id))
+print(dir(tokenizer))
+print("The max model length is {} for this model, although the actual embedding size for GPT small is 768".format(tokenizer.model_max_length))
+print("The beginning of sequence token {} token has the id {}".format(tokenizer._convert_id_to_token(tokenizer.bos_token_id), tokenizer.bos_token_id))
+print("The end of sequence token {} has the id {}".format(tokenizer._convert_id_to_token(tokenizer.eos_token_id), tokenizer.eos_token_id))
+print("The padding token {} has the id {}".format(tokenizer._convert_id_to_token(tokenizer.pad_token_id), tokenizer.pad_token_id))
 
 batch_size = 2
 
