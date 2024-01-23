@@ -194,8 +194,14 @@ for epoch_i in range(0, epochs):
 
     model.train()
 
+    print(dir(train_dataloader))
+    print(len(train_dataloader))
+
     for step, batch in enumerate(train_dataloader):
 
+        print(step)
+        print(batch)
+        
         b_input_ids = batch[0].to(device)
         b_labels = batch[0].to(device)
         b_masks = batch[1].to(device)
